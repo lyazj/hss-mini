@@ -20,7 +20,9 @@
 // system include files
 #include <memory>
 #include <iostream>
-#include <iomanip>
+#include <stdexcept>
+#include <TFile.h>
+#include <TH1F.h>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -41,23 +43,28 @@
 // This will improve performance in multithreaded jobs.
 
 
-using reco::TrackCollection;
-
 class MiniAnalysis : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
-   public:
-      explicit MiniAnalysis(const edm::ParameterSet&);
-      ~MiniAnalysis();
+public:
+  explicit MiniAnalysis(const edm::ParameterSet&);
+  ~MiniAnalysis();
 
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 
-   private:
-      virtual void beginJob() override;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
-      virtual void endJob() override;
+private:
+  virtual void beginJob() override;
+  virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+  virtual void endJob() override;
 
-      // ----------member data ---------------------------
-      edm::EDGetTokenT<pat::JetCollection> jetsToken_;
+  // ----------member data ---------------------------
+  edm::EDGetTokenT<pat::JetCollection> jetsToken_;
+  std::string fileout_;
+  std::shared_ptr<TFile> tfileout_;
+  std::shared_ptr<TH1F> histCharge_;
+  std::shared_ptr<TH1F> histSrecoPT_;
+  std::shared_ptr<TH1F> histSrecoEta_;
+  std::shared_ptr<TH1F> histSrecoPhi_;
+  std::shared_ptr<TH1F> histSrecoM_;
 };
 
 //
@@ -72,20 +79,32 @@ class MiniAnalysis : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 // constructors and destructor
 //
 MiniAnalysis::MiniAnalysis(const edm::ParameterSet& iConfig)
-    : jetsToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
-
+  : jetsToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
+  , fileout_(iConfig.getUntrackedParameter<std::string>("fileout"))
 {
-   //now do what ever initialization is needed
-
+  // now do what ever initialization is needed
+  tfileout_.reset(new TFile(fileout_.c_str(), "RECREATE"));
+  if(!tfileout_->IsOpen()) {
+    throw std::runtime_error("error opening output file " + fileout_);
+  }
+  histCharge_.reset(new TH1F("histCharge", "Jet PF constituent charge", 50, -2.0, 2.0));
+  histSrecoPT_.reset(new TH1F("histSrecoPT", "Strange hadron reconstruction pT", 50, 0.0, 500.0));
+  histSrecoEta_.reset(new TH1F("histSrecoEta", "Strange hadron reconstruction eta", 50, -4.0, 4.0));
+  histSrecoPhi_.reset(new TH1F("histSrecoPhi", "Strange hadron reconstruction phi", 50, -4.0, 4.0));
+  histSrecoM_.reset(new TH1F("histSrecoM", "Strange hadron reconstruction mass", 50, 0.0, 1.0));
 }
 
 
 MiniAnalysis::~MiniAnalysis()
 {
-
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
-
+  // do anything here that needs to be done at desctruction time
+  // (e.g. close files, deallocate resources etc.)
+  tfileout_->cd();
+  histCharge_->Write();
+  histSrecoPT_->Write();
+  histSrecoEta_->Write();
+  histSrecoPhi_->Write();
+  histSrecoM_->Write();
 }
 
 
@@ -103,13 +122,21 @@ MiniAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(jetsToken_, jets);
 
   for(const pat::Jet &jet : *jets) {
-    std::cout << jet.numberOfDaughters();
-    for(unsigned int id = 0, nd = jet.numberOfDaughters(); id < nd; ++id) {
+    unsigned nd = jet.numberOfDaughters();
+    float weight = 2.0f / (nd * (nd - 1));
+    for(unsigned int id = 0; id < nd; ++id) {
       const pat::PackedCandidate &dau = dynamic_cast<const pat::PackedCandidate &>(*jet.daughter(id));
-      // [TODO]
-      std::cout << std::fixed << std::setprecision(3) << " " << dau.pt();
+      histCharge_->Fill(dau.charge());
+      for(unsigned int jd = id + 1; jd < nd; ++jd) {
+        const pat::PackedCandidate &pfi = dynamic_cast<const pat::PackedCandidate &>(*jet.daughter(id));
+        const pat::PackedCandidate &pfj = dynamic_cast<const pat::PackedCandidate &>(*jet.daughter(jd));
+        auto p4 = pfi.p4() + pfj.p4();
+        histSrecoPT_->Fill(p4.Pt(), weight);
+        histSrecoEta_->Fill(p4.Eta(), weight);
+        histSrecoPhi_->Fill(p4.Phi(), weight);
+        histSrecoM_->Fill(p4.M(), weight);
+      }
     }
-    std::cout << std::endl;
   }
 
 #ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
