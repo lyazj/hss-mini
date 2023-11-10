@@ -10,6 +10,6 @@ export FILEIN="$1"
 export FILEOUT="$2"
 export NEVENT="$3"
 
-cd "$(dirname "$0")"
+cd /afs/cern.ch/user/l/legao/CMSSW_10_6_31/src/PhysicsTools/MiniAnalysis/scripts
 cmsenv
 exec cmsRun MiniAnalysis.py
