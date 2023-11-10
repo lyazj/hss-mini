@@ -1,3 +1,5 @@
+# usage: cmsRun MiniAnalysis.py
+
 import MiniAnalysisConfig
 import FWCore.ParameterSet.Config as cms
 
