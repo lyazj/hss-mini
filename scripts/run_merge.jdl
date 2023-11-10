@@ -1,0 +1,19 @@
+Universe = vanilla
+Executable = /afs/cern.ch/user/l/legao/CMSSW_10_6_31/src/PhysicsTools/MiniAnalysis/scripts/run_merge.sh
+
++ProjectName="cms.org.cern"
+
+Arguments = $(LINE)
+
+requirements = (OpSysAndVer =?= "CentOS7")
+request_cpus = 1
+request_memory = 1024
+
++JobFlavour = "espresso"
+
+Log    = log/$(LINE).log
+Output = log/$(LINE)_1.log
+Error  = log/$(LINE)_2.log
+
+should_transfer_files = NO
+Queue LINE from merge.txt
