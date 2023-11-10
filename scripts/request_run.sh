@@ -14,9 +14,9 @@ request_memory = 1024
 
 +JobFlavour = "espresso"
 
-Log    = __TO_BE_REPLACED_LOGDIR/$(Cluster)_$(ID).log
-Output = __TO_BE_REPLACED_LOGDIR/$(Cluster)_$(ID)_1.log
-Error  = __TO_BE_REPLACED_LOGDIR/$(Cluster)_$(ID)_2.log
+Log    = __TO_BE_REPLACED_LOGDIR/$(Cluster)_$(Process).log
+Output = __TO_BE_REPLACED_LOGDIR/$(Cluster)_$(Process)_1.log
+Error  = __TO_BE_REPLACED_LOGDIR/$(Cluster)_$(Process)_2.log
 
 should_transfer_files = NO
 Queue FILEIN, FILEOUT from ('
@@ -32,8 +32,8 @@ CONTENT="${CONTENT/__TO_BE_REPLACED_LOGDIR/${LOGDIR}}"
 echo "${CONTENT}" > run.jdl
 
 for FILE in $(ls "${DIRIN}"/*.root); do
-    FILEIN="${DIRIN}/${FILE}"
-    FILEOUT="${DIROUT}/${FILE/MiniAODv2/MiniAnalysis}"
+    FILEIN="file:${DIRIN}/${FILE}"
+    FILEOUT="file:${DIROUT}/${FILE/MiniAODv2/MiniAnalysis}"
     echo "${FILEIN}, ${FILEOUT}"
 done | tee -a run.jdl
 echo ')' >> run.jdl

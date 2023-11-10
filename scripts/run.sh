@@ -5,7 +5,7 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-set -ev
+set -e
 export FILEIN="$1"
 export FILEOUT="$2"
 export NEVENT="$3"
