@@ -1,0 +1,151 @@
+// -*- C++ -*-
+//
+// Package:    PhysicsTools/MiniAnalysis
+// Class:      MiniAnalysis
+//
+/**\class MiniAnalysis MiniAnalysis.cc PhysicsTools/MiniAnalysis/plugins/MiniAnalysis.cc
+
+ Description: Hss MiniAOD analysis routines.
+
+ Implementation:
+     Reference: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2017#Examples
+*/
+//
+// Original Author:  Leyun Gao
+//         Created:  Fri, 10 Nov 2023 09:46:19 GMT
+//
+//
+
+
+// system include files
+#include <memory>
+#include <iostream>
+#include <iomanip>
+
+// user include files
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+//
+// class declaration
+//
+
+// If the analyzer does not use TFileService, please remove
+// the template argument to the base class so the class inherits
+// from  edm::one::EDAnalyzer<>
+// This will improve performance in multithreaded jobs.
+
+
+using reco::TrackCollection;
+
+class MiniAnalysis : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
+   public:
+      explicit MiniAnalysis(const edm::ParameterSet&);
+      ~MiniAnalysis();
+
+      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+
+
+   private:
+      virtual void beginJob() override;
+      virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+      virtual void endJob() override;
+
+      // ----------member data ---------------------------
+      edm::EDGetTokenT<pat::JetCollection> jetsToken_;
+};
+
+//
+// constants, enums and typedefs
+//
+
+//
+// static data member definitions
+//
+
+//
+// constructors and destructor
+//
+MiniAnalysis::MiniAnalysis(const edm::ParameterSet& iConfig)
+    : jetsToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
+
+{
+   //now do what ever initialization is needed
+
+}
+
+
+MiniAnalysis::~MiniAnalysis()
+{
+
+   // do anything here that needs to be done at desctruction time
+   // (e.g. close files, deallocate resources etc.)
+
+}
+
+
+//
+// member functions
+//
+
+// ------------ method called for each event  ------------
+void
+MiniAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+{
+  using namespace edm;
+
+  Handle<pat::JetCollection> jets;
+  iEvent.getByToken(jetsToken_, jets);
+
+  for(const pat::Jet &jet : *jets) {
+    std::cout << jet.numberOfDaughters();
+    for(unsigned int id = 0, nd = jet.numberOfDaughters(); id < nd; ++id) {
+      const pat::PackedCandidate &dau = dynamic_cast<const pat::PackedCandidate &>(*jet.daughter(id));
+      // [TODO]
+      std::cout << std::fixed << std::setprecision(3) << " " << dau.pt();
+    }
+    std::cout << std::endl;
+  }
+
+#ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
+  ESHandle<SetupData> pSetup;
+  iSetup.get<SetupRecord>().get(pSetup);
+#endif
+}
+
+
+// ------------ method called once each job just before starting event loop  ------------
+void
+MiniAnalysis::beginJob()
+{
+}
+
+// ------------ method called once each job just after ending the event loop  ------------
+void
+MiniAnalysis::endJob()
+{
+}
+
+// ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
+void
+MiniAnalysis::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  //The following says we do not know what parameters are allowed so do no validation
+  // Please change this to state exactly what you do use, even if it is no parameters
+  edm::ParameterSetDescription desc;
+  desc.setUnknown();
+  descriptions.addDefault(desc);
+
+  //Specify that only 'tracks' is allowed
+  //To use, remove the default given above and uncomment below
+  //ParameterSetDescription desc;
+  //desc.addUntracked<edm::InputTag>("tracks","ctfWithMaterialTracks");
+  //descriptions.addDefault(desc);
+}
+
+//define this as a plug-in
+DEFINE_FWK_MODULE(MiniAnalysis);
