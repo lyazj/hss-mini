@@ -19,6 +19,7 @@ Output = __TO_BE_REPLACED_LOGDIR/$(Cluster)_$(Process)_1.log
 Error  = __TO_BE_REPLACED_LOGDIR/$(Cluster)_$(Process)_2.log
 
 should_transfer_files = NO
+transfer_output_files = ""
 Queue FILEIN, FILEOUT from ('
 
 DIRIN=/eos/user/l/legao/hss/samples/MiniAOD/WplusH_HToSS_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8/HIG-RunIISummer20UL18MiniAODv2-00000

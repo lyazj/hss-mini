@@ -16,4 +16,5 @@ Output = log/$(LINE)_1.log
 Error  = log/$(LINE)_2.log
 
 should_transfer_files = NO
+transfer_output_files = ""
 Queue LINE from merge.txt
