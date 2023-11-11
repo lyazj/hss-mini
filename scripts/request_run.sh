@@ -32,8 +32,8 @@ CONTENT="${CONTENT/__TO_BE_REPLACED_LOGDIR/${LOGDIR}}"
 echo "${CONTENT}" > run.jdl
 
 for FILE in $(ls "${DIRIN}"/*.root); do
-    FILEIN="file:${DIRIN}/${FILE}"
-    FILEOUT="file:${DIROUT}/${FILE/MiniAODv2/MiniAnalysis}"
+    FILEIN="file:${FILE}"
+    FILEOUT="file:${DIROUT}/$(basename "${FILE/MiniAODv2/MiniAnalysis}")"
     echo "${FILEIN}, ${FILEOUT}"
 done | tee -a run.jdl
 echo ')' >> run.jdl
