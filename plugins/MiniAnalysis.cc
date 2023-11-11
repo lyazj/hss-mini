@@ -88,7 +88,7 @@ MiniAnalysis::MiniAnalysis(const edm::ParameterSet& iConfig)
     throw std::runtime_error("error opening output file " + fileout_);
   }
   histCharge_.reset(new TH1F("histCharge", "Jet PF constituent charge", 50, -2.0, 2.0));
-  histSrecoPT_.reset(new TH1F("histSrecoPT", "Strange hadron reconstruction pT", 50, 0.0, 500.0));
+  histSrecoPT_.reset(new TH1F("histSrecoPT", "Strange hadron reconstruction pT", 50, 0.0, 80.0));
   histSrecoEta_.reset(new TH1F("histSrecoEta", "Strange hadron reconstruction eta", 50, -4.0, 4.0));
   histSrecoPhi_.reset(new TH1F("histSrecoPhi", "Strange hadron reconstruction phi", 50, -4.0, 4.0));
   histSrecoM_.reset(new TH1F("histSrecoM", "Strange hadron reconstruction mass", 50, 0.0, 1.0));
