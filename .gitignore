@@ -1,5 +1,6 @@
 *.pyc
 *.root
+legao.cc
 scripts/merge.sh
 scripts/merge.txt
 scripts/run.jdl
