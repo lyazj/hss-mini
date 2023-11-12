@@ -130,10 +130,9 @@ MiniAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     unsigned nd = jet.numberOfDaughters();
     float weight = 2.0f / (nd * (nd - 1));
     for(unsigned int id = 0; id < nd; ++id) {
-      const pat::PackedCandidate &dau = dynamic_cast<const pat::PackedCandidate &>(*jet.daughter(id));
-      histCharge_->Fill(dau.charge());
+      const pat::PackedCandidate &pfi = dynamic_cast<const pat::PackedCandidate &>(*jet.daughter(id));
+      histCharge_->Fill(pfi.charge());
       for(unsigned int jd = id + 1; jd < nd; ++jd) {
-        const pat::PackedCandidate &pfi = dynamic_cast<const pat::PackedCandidate &>(*jet.daughter(id));
         const pat::PackedCandidate &pfj = dynamic_cast<const pat::PackedCandidate &>(*jet.daughter(jd));
         auto p4 = pfi.p4() + pfj.p4();
         histSrecoPT_->Fill(p4.Pt(), weight);
