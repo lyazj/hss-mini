@@ -18,6 +18,8 @@
 
 
 // system include files
+#include <stdint.h>
+#include <stdlib.h>
 #include <memory>
 #include <iostream>
 #include <stdexcept>
@@ -59,6 +61,7 @@ private:
   // ----------member data ---------------------------
   edm::EDGetTokenT<pat::JetCollection> jetsToken_;
   std::string fileout_;
+  int32_t partonFlavour_;
   std::shared_ptr<TFile> tfileout_;
   std::shared_ptr<TH1F> histCharge_;
   std::shared_ptr<TH1F> histSrecoPT_;
@@ -81,6 +84,7 @@ private:
 MiniAnalysis::MiniAnalysis(const edm::ParameterSet& iConfig)
   : jetsToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
   , fileout_(iConfig.getUntrackedParameter<std::string>("fileout"))
+  , partonFlavour_(iConfig.getUntrackedParameter<int32_t>("partonFlavour"))
 {
   // now do what ever initialization is needed
   tfileout_.reset(new TFile(fileout_.c_str(), "RECREATE"));
@@ -122,6 +126,7 @@ MiniAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(jetsToken_, jets);
 
   for(const pat::Jet &jet : *jets) {
+    if(partonFlavour_ > 0 && abs(jet.partonFlavour()) != partonFlavour_) continue;
     unsigned nd = jet.numberOfDaughters();
     float weight = 2.0f / (nd * (nd - 1));
     for(unsigned int id = 0; id < nd; ++id) {

@@ -12,3 +12,7 @@ filein = os.getenv('FILEIN').split(',')
 ### output root file ###
 #   type: str
 fileout = os.getenv('FILEOUT') or 'file:MiniAnalysisResult.root'
+
+### jet parton flavour filter ###
+#   type: int
+partonFlavour = int(os.getenv('PARTON_FLAVOUR') or 3)  # s
