@@ -6,9 +6,9 @@ if [ $# -lt 1 ]; then
 fi
 
 set -e
-export FILEIN="$1"
-export FILEOUT="$2"
-export NEVENT="$3"
+[ ! -z "$1" ] && export FILEIN="$1" || unset FILEIN
+[ ! -z "$2" ] && export FILEOUT="$2" || unset FILEOUT
+[ ! -z "$3" ] && export NEVENT="$3" || unset NEVENT
 
 cd /afs/cern.ch/user/l/legao/CMSSW_10_6_31/src/PhysicsTools/MiniAnalysis/scripts
 cmsenv

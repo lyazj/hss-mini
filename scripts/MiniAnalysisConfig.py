@@ -2,7 +2,7 @@ import os
 
 ### Maximum number of entries to process ###
 #   type: int
-nevent = int(os.getenv('NEVENT')) or -1
+nevent = int(os.getenv('NEVENT') or -1)
 
 ### input root file list ###
 #   type: iterable
