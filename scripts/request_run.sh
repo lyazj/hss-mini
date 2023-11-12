@@ -19,6 +19,7 @@ Output = __TO_BE_REPLACED_LOGDIR/$(Cluster)_$(Process)_1.log
 Error  = __TO_BE_REPLACED_LOGDIR/$(Cluster)_$(Process)_2.log
 
 should_transfer_files = NO
+transfer_input_files = ""
 transfer_output_files = ""
 Queue FILEIN, FILEOUT from ('
 
