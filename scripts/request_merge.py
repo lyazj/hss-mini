@@ -12,10 +12,14 @@ dirout = sys.argv[2]
 
 script = open('merge.sh', 'w')
 lines = open('merge.txt', 'w')
-files = os.popen("ls '%s/'*.root" % os.path.abspath(dirin)).read().strip().split()
+files = os.popen("echo '%s/'*.root" % os.path.abspath(dirin)).read().strip().split()
 for i in range((len(files) + 99) // 100):
     filein = ','.join('file:' + f for f in files[i*100 : (i+1)*100] if os.stat(f).st_size > 1024*1024)
     fileout = 'file:%s/' % os.path.abspath(dirout) + uuid.uuid3(uuid.NAMESPACE_DNS, filein).__str__().upper() + '.root'
+    try:
+        if os.stat(fileout[5:]).st_size >= 1024*1024: continue
+    except:
+        pass
     print('cmsRun %s inputFiles=' % os.path.abspath('copyPickMerge_cfg.py') + filein + ' outputFile=' + fileout + ' maxSize=-1', file=script)
     print(i + 1, file=lines)
 lines.close()

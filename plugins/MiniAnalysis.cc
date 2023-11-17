@@ -23,6 +23,11 @@
 #include <memory>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+#include <string>
+#include <utility>
 #include <TFile.h>
 #include <TH1F.h>
 
@@ -35,16 +40,55 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 //
 // class declaration
 //
+class PIDCounter {
+
+private:
+  std::unordered_map<Int_t, Long64_t> counter_;
+
+public:
+  void add(Int_t pid) { ++counter_[pid]; }
+  TH1F *plot(Long64_t minval = 0) const;
+
+};
+
+TH1F *PIDCounter::plot(Long64_t minval) const
+{
+  // Convert counter information into sorted tuples.
+  std::vector<std::pair<Int_t, Long64_t>> data;
+  data.reserve(counter_.size());
+  for(auto [pid, cnt] : counter_) {
+    if(cnt >= minval) data.emplace_back(pid, cnt);
+  }
+  sort(data.begin(), data.end());
+
+  // Fill histogram.
+  Int_t nbin = data.size();
+  TH1F *hist = new TH1F("htemp", "htemp", nbin * 2 + 1, -0.75, nbin - 0.25);
+  hist->SetXTitle("PID");
+  hist->SetYTitle("number");
+  for(Int_t ibin = 0; ibin < nbin; ++ibin) {
+    hist->Fill(ibin, data[ibin].second);
+  }
+
+  // Set x-ticks.
+  hist->GetXaxis()->SetNdivisions(nbin * 2 + 1, 0, 0);
+  for(Long64_t i = 1; i <= nbin * 2; i += 2) {
+    hist->GetXaxis()->ChangeLabel(i, -1.0, 0.0);
+    hist->GetXaxis()->ChangeLabel(i + 1, -1.0, -1.0, -1.0, -1.0, -1.0, std::to_string(data[i >> 1].first).c_str());
+  }
+  hist->GetXaxis()->ChangeLabel(nbin * 2 + 1, -1.0, 0.0);
+  return hist;
+}
 
 // If the analyzer does not use TFileService, please remove
 // the template argument to the base class so the class inherits
 // from  edm::one::EDAnalyzer<>
 // This will improve performance in multithreaded jobs.
-
-
 class MiniAnalysis : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 public:
   explicit MiniAnalysis(const edm::ParameterSet&);
@@ -60,6 +104,7 @@ private:
 
   // ----------member data ---------------------------
   edm::EDGetTokenT<pat::JetCollection> jetsToken_;
+  edm::EDGetTokenT<edm::View<reco::GenParticle>> genparsToken_;
   std::string fileout_;
   int32_t partonFlavour_;
   std::shared_ptr<TFile> tfileout_;
@@ -68,6 +113,9 @@ private:
   std::shared_ptr<TH1F> histSrecoEta_;
   std::shared_ptr<TH1F> histSrecoPhi_;
   std::shared_ptr<TH1F> histSrecoM_;
+  std::shared_ptr<TH1F> histGenCharge_;
+  PIDCounter cntGenPID_;
+  uint64_t nevent_;
 };
 
 //
@@ -83,8 +131,10 @@ private:
 //
 MiniAnalysis::MiniAnalysis(const edm::ParameterSet& iConfig)
   : jetsToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
+  , genparsToken_(consumes<edm::View<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("genpars")))
   , fileout_(iConfig.getUntrackedParameter<std::string>("fileout"))
   , partonFlavour_(iConfig.getUntrackedParameter<int32_t>("partonFlavour"))
+  , nevent_(0)
 {
   // now do what ever initialization is needed
   tfileout_.reset(new TFile(fileout_.c_str(), "RECREATE"));
@@ -96,6 +146,7 @@ MiniAnalysis::MiniAnalysis(const edm::ParameterSet& iConfig)
   histSrecoEta_.reset(new TH1F("histSrecoEta", "Strange hadron reconstruction eta", 50, -4.0, 4.0));
   histSrecoPhi_.reset(new TH1F("histSrecoPhi", "Strange hadron reconstruction phi", 50, -4.0, 4.0));
   histSrecoM_.reset(new TH1F("histSrecoM", "Strange hadron reconstruction mass", 50, 0.0, 1.0));
+  histGenCharge_.reset(new TH1F("histGenCharge", "Gen particle charge", 50, -2.0, 2.0));
 }
 
 
@@ -109,6 +160,16 @@ MiniAnalysis::~MiniAnalysis()
   histSrecoEta_->Write();
   histSrecoPhi_->Write();
   histSrecoM_->Write();
+
+  histGenCharge_->Scale(1.0 / nevent_);
+  histGenCharge_->Write();
+
+  TH1F *histGenPID = cntGenPID_.plot(nevent_ / 5);
+  histGenPID->SetName("histGenPID");
+  histGenPID->SetTitle("Gen particle PID");
+  histGenPID->Scale(1.0 / nevent_);
+  histGenPID->Write();
+  delete histGenPID;
 }
 
 
@@ -122,8 +183,12 @@ MiniAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
 
+  ++nevent_;
+
   Handle<pat::JetCollection> jets;
   iEvent.getByToken(jetsToken_, jets);
+  Handle<edm::View<reco::GenParticle>> genpars;
+  iEvent.getByToken(genparsToken_, genpars);
 
   for(const pat::Jet &jet : *jets) {
     if(partonFlavour_ > 0 && abs(jet.partonFlavour()) != partonFlavour_) continue;
@@ -141,6 +206,11 @@ MiniAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         histSrecoM_->Fill(p4.M(), weight);
       }
     }
+  }
+
+  for(const reco::GenParticle &genpar : *genpars) {
+    histGenCharge_->Fill(genpar.charge());
+    cntGenPID_.add(genpar.pdgId());
   }
 
 #ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE

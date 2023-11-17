@@ -9,6 +9,7 @@ process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(MiniAnalysisCon
 process.source = cms.Source('PoolSource', fileNames=cms.untracked.vstring(*MiniAnalysisConfig.filein), duplicateCheckMode=cms.untracked.string("noDuplicateCheck"))
 process.analyzer = cms.EDAnalyzer('MiniAnalysis',
     jets=cms.InputTag('slimmedJets'),
+    genpars=cms.InputTag('prunedGenParticles'),
     partonFlavour=cms.untracked.int32(MiniAnalysisConfig.partonFlavour),
     fileout=cms.untracked.string(MiniAnalysisConfig.fileout),
 )
