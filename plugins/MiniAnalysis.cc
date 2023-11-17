@@ -79,7 +79,7 @@ TH1F *PIDCounter::plot(Long64_t minval) const
   hist->GetXaxis()->SetNdivisions(nbin * 2 + 1, 0, 0);
   for(Long64_t i = 1; i <= nbin * 2; i += 2) {
     hist->GetXaxis()->ChangeLabel(i, -1.0, 0.0);
-    hist->GetXaxis()->ChangeLabel(i + 1, -1.0, -1.0, -1.0, -1.0, -1.0, std::to_string(data[i >> 1].first).c_str());
+    hist->GetXaxis()->ChangeLabel(i + 1, 45.0, -1.0, -1.0, -1.0, -1.0, std::to_string(data[i >> 1].first).c_str());
   }
   hist->GetXaxis()->ChangeLabel(nbin * 2 + 1, -1.0, 0.0);
   return hist;
@@ -164,7 +164,7 @@ MiniAnalysis::~MiniAnalysis()
   histGenCharge_->Scale(1.0 / nevent_);
   histGenCharge_->Write();
 
-  TH1F *histGenPID = cntGenPID_.plot(nevent_ / 5);
+  TH1F *histGenPID = cntGenPID_.plot(nevent_ / 2);
   histGenPID->SetName("histGenPID");
   histGenPID->SetTitle("Gen particle PID");
   histGenPID->Scale(1.0 / nevent_);
