@@ -18,6 +18,7 @@
 
 
 // system include files
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <memory>
@@ -28,6 +29,7 @@
 #include <algorithm>
 #include <string>
 #include <utility>
+#include <regex>
 #include <TFile.h>
 #include <TH1F.h>
 
@@ -41,6 +43,7 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "particle.h"
 
 //
 // class declaration
@@ -49,6 +52,8 @@ class PIDCounter {
 
 private:
   std::unordered_map<Int_t, Long64_t> counter_;
+  static ParticleDatabase pdg_;
+  static size_t pdg_latex_column_;
 
 public:
   void add(Int_t pid) { ++counter_[pid]; }
@@ -78,8 +83,10 @@ TH1F *PIDCounter::plot(Long64_t minval) const
   // Set x-ticks.
   hist->GetXaxis()->SetNdivisions(nbin * 2 + 1, 0, 0);
   for(Long64_t i = 1; i <= nbin * 2; i += 2) {
+    std::string name = pdg_.query(data[i >> 1].first, pdg_latex_column_);
+    name = std::regex_replace(name, (std::regex)"overline", "bar");
     hist->GetXaxis()->ChangeLabel(i, -1.0, 0.0);
-    hist->GetXaxis()->ChangeLabel(i + 1, 45.0, -1.0, -1.0, -1.0, -1.0, std::to_string(data[i >> 1].first).c_str());
+    hist->GetXaxis()->ChangeLabel(i + 1, 30.0, 0.02, -1.0, -1.0, -1.0, name.c_str());
   }
   hist->GetXaxis()->ChangeLabel(nbin * 2 + 1, -1.0, 0.0);
   return hist;
@@ -125,6 +132,8 @@ private:
 //
 // static data member definitions
 //
+ParticleDatabase PIDCounter::pdg_((getenv("CMSSW_BASE") + std::string("/src/PhysicsTools/MiniAnalysis/resource/pdginfo")).c_str());
+size_t PIDCounter::pdg_latex_column_(pdg_.query("latex_name"));
 
 //
 // constructors and destructor
