@@ -12,7 +12,7 @@ requirements = (OpSysAndVer =?= "CentOS7")
 request_cpus = 1
 request_memory = 1024
 
-+JobFlavour = "espresso"
++JobFlavour = "tomorrow"
 
 Log    = __TO_BE_REPLACED_LOGDIR/system.log
 Output = __TO_BE_REPLACED_LOGDIR/program_1.log
@@ -23,17 +23,16 @@ transfer_input_files = ""
 transfer_output_files = ""
 Queue FILEIN, FILEOUT from ('
 
-DIRIN=/eos/user/l/legao/hss/samples/MiniAOD/WplusH_HToSS_WToLNu_M-125_TuneCP5_13TeV-powheg-pythia8/HIG-RunIISummer20UL18MiniAODv2-00000
-DIROUT=output
+DIROUT=root://eosuser.cern.ch//eos/user/l/legao/hss/samples/MiniAOD/WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8/EXO-RunIISummer20UL18MiniAODv2-01346-__FLAVOUR__
 LOGDIR=log
-mkdir -p "${DIROUT}" "${LOGDIR}"
+mkdir -p "${LOGDIR}"
 CONTENT="${CONTENT/__TO_BE_REPLACED_EXECUTABLE/$(readlink -f run_split.sh)}"
 CONTENT="${CONTENT/__TO_BE_REPLACED_LOGDIR/${LOGDIR}}"
 CONTENT="${CONTENT/__TO_BE_REPLACED_LOGDIR/${LOGDIR}}"
 CONTENT="${CONTENT/__TO_BE_REPLACED_LOGDIR/${LOGDIR}}"
-echo "${CONTENT}" > run.jdl
+echo "${CONTENT}" > run_split.jdl
 
-for FILE in $(ls "${DIRIN}"/*.root); do
+for FILE in $(dasgoclient -query='file dataset=/WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM'); do
     FILEIN="${FILE}"
     FILEOUT="${DIROUT}/$(basename "${FILE/MiniAODv2/FilteredMiniAODv2}")"
     echo "${FILEIN}, ${FILEOUT}"

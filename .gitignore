@@ -4,3 +4,5 @@ legao.cc
 scripts/merge.sh
 scripts/merge.txt
 scripts/run.jdl
+scripts/run_split.jdl
+x509up
