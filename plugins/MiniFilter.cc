@@ -105,8 +105,8 @@ bool PIDMatchPattern::match_current_node(const reco::GenParticle &genpar) const
 template<class Iterator>
 bool PIDMatchPattern::match(Iterator b, Iterator e) const
 {
-  for(; b != e; ++b) {
-    const reco::GenParticle &genpar = dynamic_cast<const reco::GenParticle &>(*b);
+  for(Iterator i = b; i != e; ++i) {
+    const reco::GenParticle &genpar = dynamic_cast<const reco::GenParticle &>(*i);
     if(match_current_node(genpar)) {
       bool next_matched;
       if(!next_) next_matched = true; else {
