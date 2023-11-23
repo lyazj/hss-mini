@@ -9,7 +9,7 @@ NEVENT = -1
 Arguments = $(FILEIN) $(FILEOUT) $(NEVENT)
 
 requirements = (OpSysAndVer =?= "CentOS7")
-request_cpus = 1
+request_cpus = 8
 request_memory = 1024
 
 +JobFlavour = "tomorrow"

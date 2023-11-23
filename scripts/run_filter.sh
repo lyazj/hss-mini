@@ -14,4 +14,4 @@ set -e
 cd /afs/cern.ch/user/l/legao/CMSSW_10_6_31/src/PhysicsTools/MiniAnalysis/scripts
 cmsenv
 cp x509up /tmp/x509up_u$UID
-exec cmsRun MiniFilter.py
+exec cmsRun --numThreads 8 MiniFilter.py
