@@ -8,7 +8,7 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(MiniFilterConfig.nevent))
 process.source = cms.Source('PoolSource',
     fileNames=cms.untracked.vstring(*MiniFilterConfig.filein),
-    duplicateCheckMode=cms.untracked.string("noDuplicateCheck")
+    duplicateCheckMode=cms.untracked.string("noDuplicateCheck"),
 )
 process.destination = cms.OutputModule('PoolOutputModule',
     SelectEvents=cms.untracked.PSet(SelectEvents=cms.vstring('p')),
