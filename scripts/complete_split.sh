@@ -10,6 +10,6 @@ for FILE in $(dasgoclient -query='file dataset=/WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amc
         SIZE="$(xrdfs eosuser.cern.ch stat "${FILEOUT:23}" 2>/dev/null | grep Size | grep -o '[0-9]\+')"
         [ "${SIZE}" -ge 1048576 ] 2>/dev/null && continue
         [ -z "${SIZE}" ] && xrdfs eosuser.cern.ch ls "$(dirname "${FILEOUT:23}")" | grep -q "$(basename "${FILEOUT:23}")" && continue
-        echo ./run_filter.sh "${FILEIN}" "${FILEOUT}" -1 "23(${PID},-${PID})"  # dry run
+        echo ./run_filter.sh "${FILEIN}" "${FILEOUT}" -1 "\"23(${PID},-${PID})\""  # dry run
     done
 done
