@@ -30,11 +30,11 @@ CONTENT="${CONTENT/__TO_BE_REPLACED_EXECUTABLE/$(readlink -f run_split.sh)}"
 CONTENT="${CONTENT/__TO_BE_REPLACED_LOGDIR/${LOGDIR}}"
 CONTENT="${CONTENT/__TO_BE_REPLACED_LOGDIR/${LOGDIR}}"
 CONTENT="${CONTENT/__TO_BE_REPLACED_LOGDIR/${LOGDIR}}"
-echo "${CONTENT}" > run_split.jdl
+echo "${CONTENT}" > run_split_wzqq.jdl
 
 for FILE in $(dasgoclient -query='file dataset=/WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM'); do
     FILEIN="${FILE}"
     FILEOUT="${DIROUT}/$(basename "${FILE/MiniAODv2/FilteredMiniAODv2}")"
     echo "${FILEIN}, ${FILEOUT}"
-done | tee -a run_split.jdl
-echo ')' >> run_split.jdl
+done | tee -a run_split_wzqq.jdl
+echo ')' >> run_split_wzqq.jdl
