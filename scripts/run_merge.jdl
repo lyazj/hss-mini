@@ -5,7 +5,6 @@ Executable = /afs/cern.ch/user/l/legao/CMSSW_10_6_31/src/PhysicsTools/MiniAnalys
 
 Arguments = $(LINE)
 
-requirements = (OpSysAndVer =?= "CentOS7")
 request_cpus = 1
 request_memory = 1024
 

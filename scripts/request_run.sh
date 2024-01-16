@@ -8,7 +8,6 @@ Executable = __TO_BE_REPLACED_EXECUTABLE
 NEVENT = -1
 Arguments = $(FILEIN) $(FILEOUT) $(NEVENT)
 
-requirements = (OpSysAndVer =?= "CentOS7")
 request_cpus = 1
 request_memory = 1024
 
