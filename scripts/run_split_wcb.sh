@@ -6,6 +6,10 @@ if [ $# != 3 ] && [ $# != 4 ]; then
 fi
 
 set -e
-touch "$2".lock
+LOCKDIR=/afs/cern.ch/user/l/legao/CMSSW_10_6_31/src/PhysicsTools/MiniAnalysis/scripts/lock
+LOCKNAME="$(sed 's@/@_@g' <<< "$2")"
+LOCK="${LOCKDIR}"/"${LOCKNAME}"
+mkdir -p "${LOCKDIR}"
+mkdir -p "${LOCK}"
 /afs/cern.ch/user/l/legao/CMSSW_10_6_31/src/PhysicsTools/MiniAnalysis/scripts/run_filter.sh "$1" "$2" "$3" "*24(*4,*5)" "$4"
-rm "$2".lock
+rmdir "${LOCK}"
