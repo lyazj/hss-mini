@@ -16,3 +16,7 @@ fileout = os.getenv('FILEOUT') or 'file:MiniFilterResult.root'
 ### filter patterns ###
 #   type: iterable
 patterns = os.getenv('PATTERNS').split(':')
+
+### reverse filtering ###
+#   type: bool
+reverse = bool(os.getenv('REVERSE'))

@@ -158,6 +158,7 @@ private:
    * If PID is leaded by an asterisk, the absolute values are taken for matching.
    */
   std::vector<std::string> pattern_strings_;
+  bool reverse_;
   std::vector<PIDMatchPattern> patterns_;
   edm::EDGetTokenT<edm::View<reco::GenParticle>> genparsToken_;
 };
@@ -175,6 +176,7 @@ private:
 //
 MiniFilter::MiniFilter(const edm::ParameterSet& iConfig)
   : pattern_strings_(iConfig.getUntrackedParameter<std::vector<std::string>>("patterns"))
+  , reverse_(iConfig.getUntrackedParameter<bool>("reverse"))
   , genparsToken_(consumes<edm::View<reco::GenParticle>>(iConfig.getParameter<edm::InputTag>("genpars")))
 {
   // now do what ever initialization is needed
@@ -212,12 +214,14 @@ MiniFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iSetup.get<SetupRecord>().get(pSetup);
 #endif
 
+  bool result = false;
   Handle<edm::View<reco::GenParticle>> genpars;
   iEvent.getByToken(genparsToken_, genpars);
   for(const PIDMatchPattern &pattern : patterns_) {
-    if(pattern.match(*genpars)) return true;
+    if(pattern.match(*genpars)) { result = true; break; }
   }
-  return false;
+  if(reverse_) result = !result;
+  return result;
 }
 
 // ------------ method called once each stream before processing any runs, lumis or events  ------------

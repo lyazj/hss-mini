@@ -17,6 +17,7 @@ process.destination = cms.OutputModule('PoolOutputModule',
 process.filter = cms.EDFilter('MiniFilter',
     genpars=cms.InputTag('prunedGenParticles'),
     patterns=cms.untracked.vstring(*MiniFilterConfig.patterns),
+    reverse=cms.untracked.bool(MiniFilterConfig.reverse),
 )
 process.p = cms.Path(process.filter)
 process.outpath = cms.EndPath(process.destination)
