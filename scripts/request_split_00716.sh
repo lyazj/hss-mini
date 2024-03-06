@@ -27,7 +27,7 @@ transfer_input_files = ""
 transfer_output_files = ""
 Queue FILEIN, FILEOUT from ('
 
-DIROUT=root://eosuser.cern.ch//eos/user/l/legao/hss/samples/MiniAOD2/WJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/HIG-RunIISummer20UL18MiniAODv2-00716-wcb
+DIROUT=root://eosuser.cern.ch//eos/user/l/legao/hss/samples/MiniAOD/WJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/HIG-RunIISummer20UL18MiniAODv2-00716-wcb
 LOGDIR=log
 mkdir -p "${LOGDIR}"
 CONTENT="${CONTENT/__TO_BE_REPLACED_EXECUTABLE/$(readlink -f run_split_wcb.sh)}"
