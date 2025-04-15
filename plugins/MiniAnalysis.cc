@@ -21,7 +21,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <memory>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -114,14 +113,18 @@ private:
   edm::EDGetTokenT<edm::View<reco::GenParticle>> genparsToken_;
   std::string fileout_;
   int32_t partonFlavour_;
-  std::shared_ptr<TFile> tfileout_;
-  std::shared_ptr<TH1F> histCharge_;
-  std::shared_ptr<TH1F> histSrecoPT_;
-  std::shared_ptr<TH1F> histSrecoEta_;
-  std::shared_ptr<TH1F> histSrecoPhi_;
-  std::shared_ptr<TH1F> histSrecoM_;
-  std::shared_ptr<TH1F> histGenCharge_;
-  PIDCounter cntGenPID_;
+  TFile *tfileout_;
+  TH1F *histCharge_;
+  TH1F *histSrecoPT_;
+  TH1F *histSrecoEta_;
+  TH1F *histSrecoPhi_;
+  TH1F *histSrecoM_;
+  TH1F *histGenCharge_;
+  TH1F *histHgenPT_;
+  TH1F *histHgenEta_;
+  TH1F *histHgenPhi_;
+  TH1F *histHgenM_;
+  //PIDCounter cntGenPID_;
   uint64_t nevent_;
 };
 
@@ -146,16 +149,20 @@ MiniAnalysis::MiniAnalysis(const edm::ParameterSet& iConfig)
   , nevent_(0)
 {
   // now do what ever initialization is needed
-  tfileout_.reset(new TFile(fileout_.c_str(), "RECREATE"));
+  tfileout_ = (new TFile(fileout_.c_str(), "RECREATE"));
   if(!tfileout_->IsOpen()) {
     throw std::runtime_error("error opening output file " + fileout_);
   }
-  histCharge_.reset(new TH1F("histCharge", "Jet PF constituent charge", 50, -2.0, 2.0));
-  histSrecoPT_.reset(new TH1F("histSrecoPT", "Strange hadron reconstruction pT", 50, 0.0, 30.0));
-  histSrecoEta_.reset(new TH1F("histSrecoEta", "Strange hadron reconstruction eta", 50, -4.0, 4.0));
-  histSrecoPhi_.reset(new TH1F("histSrecoPhi", "Strange hadron reconstruction phi", 50, -4.0, 4.0));
-  histSrecoM_.reset(new TH1F("histSrecoM", "Strange hadron reconstruction mass", 50, 0.0, 1.0));
-  histGenCharge_.reset(new TH1F("histGenCharge", "Gen particle charge", 50, -2.0, 2.0));
+  histCharge_ = (new TH1F("histCharge", "Jet PF constituent charge", 50, -2.0, 2.0));
+  histSrecoPT_ = (new TH1F("histSrecoPT", "Strange hadron reconstruction pT", 50, 0.0, 30.0));
+  histSrecoEta_ = (new TH1F("histSrecoEta", "Strange hadron reconstruction eta", 50, -4.0, 4.0));
+  histSrecoPhi_ = (new TH1F("histSrecoPhi", "Strange hadron reconstruction phi", 50, -4.0, 4.0));
+  histSrecoM_ = (new TH1F("histSrecoM", "Strange hadron reconstruction mass", 50, 0.0, 1.0));
+  histGenCharge_ = (new TH1F("histGenCharge", "Gen particle charge", 50, -2.0, 2.0));
+  histHgenPT_ = (new TH1F("histHgenPT", "HiggsPlus boson gen pT", 50, 0.0, 1000.0));
+  histHgenEta_ = (new TH1F("histHgenEta", "HiggsPlus boson gen eta", 50, -3.0, 3.0));
+  histHgenPhi_ = (new TH1F("histHgenPhi", "HiggsPlus boson gen phi", 50, -3.2, 3.2));
+  histHgenM_ = (new TH1F("histHgenM", "HiggsPlus boson gen mass", 50, 0.0, 200.0));
 }
 
 
@@ -173,12 +180,19 @@ MiniAnalysis::~MiniAnalysis()
   histGenCharge_->Scale(1.0 / nevent_);
   histGenCharge_->Write();
 
-  TH1F *histGenPID = cntGenPID_.plot(nevent_ / 2);
-  histGenPID->SetName("histGenPID");
-  histGenPID->SetTitle("Gen particle PID");
-  histGenPID->Scale(1.0 / nevent_);
-  histGenPID->Write();
-  delete histGenPID;
+  //TH1F *histGenPID = cntGenPID_.plot(nevent_ / 2);
+  //histGenPID->SetName("histGenPID");
+  //histGenPID->SetTitle("Gen particle PID");
+  //histGenPID->Scale(1.0 / nevent_);
+  //histGenPID->Write();
+  //delete histGenPID;
+
+  histHgenPT_->Write();
+  histHgenEta_->Write();
+  histHgenPhi_->Write();
+  histHgenM_->Write();
+
+  tfileout_->Close();
 }
 
 
@@ -219,7 +233,14 @@ MiniAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   for(const reco::GenParticle &genpar : *genpars) {
     histGenCharge_->Fill(genpar.charge());
-    cntGenPID_.add(genpar.pdgId());
+    //cntGenPID_.add(genpar.pdgId());
+    if(genpar.pdgId() == 37) {  // HiggsPlus
+      auto p4 = genpar.p4();
+      histHgenPT_->Fill(p4.Pt());
+      histHgenEta_->Fill(p4.Eta());
+      histHgenPhi_->Fill(p4.Phi());
+      histHgenM_->Fill(p4.M());
+    }
   }
 
 #ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
